@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torchvision.io import read_image
@@ -73,7 +73,20 @@ class CustomImageDataset(Dataset):
       image = read_image(img_path)
       label = self.img_labels.iloc[idx, 1]
       if self.transform:
-         img = self.transform(image)
+         image = self.transform(image)
       if self.target_transform:
          label = self.target_transform(label)
-      return image, label
+      sample = {"image": image, "label": label}
+      return sample
+
+train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
+
+train_features, train_labels = next(iter(train_dataloader))
+print(f"Feature batch shape: {train_features.size()}")
+print(f"Labels batch shape: {train_labels.size()}")
+img = train_features[0].squeeze()
+label = train_labels[0]
+plt.imshow(img, cmap="gray")
+plt.show()
+print(f"Label: {label}")
